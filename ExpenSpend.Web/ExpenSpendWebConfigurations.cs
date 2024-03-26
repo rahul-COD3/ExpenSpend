@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Builder;
 
 namespace ExpenSpend.Web;
 
@@ -25,7 +26,7 @@ public static class ExpenSpendWebConfigurations
 {
     public static void AddDbContextConfig(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<ExpenSpendDbContext>(options =>
+        services.AddDbContext<ApplicationDbContext>(options =>
         {
             options.UseNpgsql(configuration.GetConnectionString("AppDbContext") ?? throw new InvalidOperationException("Connection string 'AppDbContext' not found."));
         });
@@ -41,8 +42,8 @@ public static class ExpenSpendWebConfigurations
     }
     public static void AddIdentityConfig(this IServiceCollection services)
     {
-        services.AddIdentity<ESUser, IdentityRole<Guid>>(options => options.SignIn.RequireConfirmedEmail = true)
-            .AddEntityFrameworkStores<ExpenSpendDbContext>()
+        services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options => options.SignIn.RequireConfirmedEmail = true)
+            .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
     }
 
@@ -132,5 +133,23 @@ public static class ExpenSpendWebConfigurations
                 }
             });
         });
+    }
+    public static void ApplyMigrations(this WebApplication app)
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var serviceProvider = scope.ServiceProvider;
+            try
+            {
+                var dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
+                dbContext.Database.Migrate();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error applying migrations: {ex.Message}");
+            }
+            // Seed Database
+            ExpenSpendDbInitializer.Seed(app);
+        }
     }
 }

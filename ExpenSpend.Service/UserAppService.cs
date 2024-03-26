@@ -12,13 +12,13 @@ namespace ExpenSpend.Service;
 
 public class UserAppService : IUserAppService
 {
-    private readonly UserManager<ESUser> _userManager;
-    private readonly IRepository<ESUser> _userRepository;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IRepository<ApplicationUser> _userRepository;
     private readonly IMapper _mapper;
-    private readonly ExpenSpendDbContext _context;
+    private readonly ApplicationDbContext _context;
     private readonly IHttpContextAccessor _httpContext;
 
-    public UserAppService(UserManager<ESUser> userManager, IRepository<ESUser> userRepository, IMapper mapper, ExpenSpendDbContext expenSpendDbContext, IHttpContextAccessor httpContext)
+    public UserAppService(UserManager<ApplicationUser> userManager, IRepository<ApplicationUser> userRepository, IMapper mapper, ApplicationDbContext expenSpendDbContext, IHttpContextAccessor httpContext)
     {
         _userManager = userManager;
         _userRepository = userRepository;
@@ -32,7 +32,7 @@ public class UserAppService : IUserAppService
         var loggedInUserId = _httpContext.HttpContext.User.Identity?.Name;
         if (loggedInUserId != null)
         {
-            var user = await _userManager.FindByIdAsync(loggedInUserId);
+            var user = await _userManager.FindByNameAsync(loggedInUserId);
             return new Response(_mapper.Map<GetUserDto>(user));
         }
         return null;
@@ -63,7 +63,7 @@ public class UserAppService : IUserAppService
         }
         try
         {
-            var updatedUser = _mapper.Map<ESUser>(userToUpdate);
+            var updatedUser = _mapper.Map<ApplicationUser>(userToUpdate);
             await _userRepository.UpdateAsync(updatedUser);
             return new Response(_mapper.Map<GetUserDto>(updatedUser));
         }
@@ -76,11 +76,15 @@ public class UserAppService : IUserAppService
     public async Task<Response> DeleteUserAsync(Guid id)
     {
         var user = await _userRepository.GetByIdAsync(id);
+        if (user == null)
+        {
+            return new Response("User not found!");
+        }
         await _userRepository.DeleteAsync(user);
         return new Response("User deleted successfully!");
     }
 
-    public async Task<ESUser?> GetUserByEmailAsync(string email)
+    public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
     {
         var result = await _userManager.FindByEmailAsync(email);
         if (result != null)

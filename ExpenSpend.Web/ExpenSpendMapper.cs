@@ -14,9 +14,9 @@ namespace ExpenSpend.Web
     {
         public ExpenSpendMapper()
         {
-            CreateMap<ESUser, CreateUserDto>().ForMember(dest => dest.Password, opt => opt.Ignore()).ReverseMap();
-            CreateMap<ESUser, UpdateUserDto>().ReverseMap();
-            CreateMap<ESUser, GetUserDto>();
+            CreateMap<ApplicationUser, CreateUserDto>().ForMember(dest => dest.Password, opt => opt.Ignore()).ReverseMap();
+            CreateMap<ApplicationUser, UpdateUserDto>().ReverseMap();
+            CreateMap<ApplicationUser, GetUserDto>();
             CreateMap<Friendship, GetFriendshipDto>();
             CreateMap<CreateFriendshipDto, Friendship>();
             CreateMap<Group, GetGroupDto>();

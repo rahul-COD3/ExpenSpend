@@ -11,7 +11,7 @@ public class Expense : BaseEntity
     public Guid GroupId { get; set; }
     public Group? Group { get; set; }
     public Guid PaidById { get; set; }
-    public ESUser? PaidBy { get; set; }
+    public ApplicationUser? PaidBy { get; set; }
     public double Amount { get; set; }
     public SplitAs SplitAs { get; set; } = SplitAs.Equally;
     public bool IsSettled { get; set; }

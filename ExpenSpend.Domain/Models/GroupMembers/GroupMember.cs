@@ -8,7 +8,7 @@ namespace ExpenSpend.Domain.Models.GroupMembers
         public Guid GroupId { get; set; }
         public Group? Group { get; set; }
         public Guid UserId { get; set; }
-        public ESUser? User { get; set; }
+        public ApplicationUser? User { get; set; }
         public bool IsAdmin { get; set; }
     }
 }

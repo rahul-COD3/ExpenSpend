@@ -10,17 +10,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenSpend.Data.Context;
 
-public class ExpenSpendDbContext : IdentityDbContext<ESUser, IdentityRole<Guid>, Guid>
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
 {
 #pragma warning disable CS0114 // Member hides inherited member; missing override keyword
-    public DbSet<ESUser> Users { get; set; }
+    public DbSet<ApplicationUser> Users { get; set; }
 #pragma warning restore CS0114 // Member hides inherited member; missing override keyword
     public DbSet<Friendship> Friendships { get; set; }
     public DbSet<Group> Groups { get; set; }
     public DbSet<GroupMember> GroupMembers { get; set; }
     public DbSet<Expense> Expenses { get; set; }
     public DbSet<Payment> Payments { get; set; }
-    public ExpenSpendDbContext(DbContextOptions<ExpenSpendDbContext> options) : base(options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
@@ -32,7 +32,7 @@ public class ExpenSpendDbContext : IdentityDbContext<ESUser, IdentityRole<Guid>,
 
         builder.Entity<Friendship>(b =>
         {
-            // Set up the many-to-many relationship for ESUser and Friendship
+            // Set up the many-to-many relationship for ApplicationUser and Friendship
             b.HasOne(f => f.Initiator)
              .WithMany()
              .HasForeignKey(f => f.InitiatorId)

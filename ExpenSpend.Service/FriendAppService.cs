@@ -15,13 +15,13 @@ namespace ExpenSpend.Service
     public class FriendAppService : IFriendAppService
     {
         private readonly IRepository<Friendship> _friendRepository;
-        private readonly ExpenSpendDbContext _context;
+        private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContext;
 
         public FriendAppService(
             IRepository<Friendship> friendRepository, 
-            ExpenSpendDbContext context, IMapper mapper,
+            ApplicationDbContext context, IMapper mapper,
             IHttpContextAccessor httpContext
         ){
             _friendRepository = friendRepository;
@@ -78,15 +78,16 @@ namespace ExpenSpend.Service
         {
             var currentUser = _httpContext.HttpContext?.User?.Identity?.Name;
             var currUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUser);
-            var friend = new Friendship
+
+            var friendshipExists = await _context.Friendships.FirstOrDefaultAsync(f => f.InitiatorId == currUser!.Id && f.RecipientId == recipientId || f.InitiatorId == recipientId && f.RecipientId == currUser.Id);
+            if (friendshipExists != null)
             {
-                InitiatorId = currUser!.Id,
-                RecipientId = recipientId,
-                Status = FriendshipStatus.Pending,
-                CreatedAt = DateTime.Now,
-                CreatedBy = currUser.Id
-            };
+                return new Response("Friendship already exists.");
+            }
+
+            var friend = new Friendship(currUser!.Id, recipientId, FriendshipStatus.Pending, DateTime.Now, currUser.Id);
             await _friendRepository.InsertAsync(friend);
+
             return new Response(_mapper.Map<GetFriendshipDto>(friend));
         }
         public async Task<Response> UpdateFriendAsync(Friendship friendship)

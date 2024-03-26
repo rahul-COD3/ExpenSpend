@@ -17,7 +17,7 @@ namespace ExpenSpend.Data.Context
         {
             using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
             {
-                var context = serviceScope.ServiceProvider.GetService<ExpenSpendDbContext>();
+                var context = serviceScope.ServiceProvider.GetService<ApplicationDbContext>();
 
                 context!.Database.EnsureCreated();
 
@@ -35,12 +35,12 @@ namespace ExpenSpend.Data.Context
 
                 // Seed Users
 
-                var hasher = new PasswordHasher<ESUser>();
+                var hasher = new PasswordHasher<ApplicationUser>();
                 if (!context.Users.Any())
                 {
-                    context.Users.AddRange(new List<ESUser>()
+                    context.Users.AddRange(new List<ApplicationUser>()
                     {
-                        new ESUser() {
+                        new ApplicationUser() {
                             Email = "admin@gmail.com",
                             NormalizedEmail = "ADMIN@GMAIL.COM",
                             FirstName = "Admin",
@@ -50,9 +50,9 @@ namespace ExpenSpend.Data.Context
                             ConcurrencyStamp ="1",
                             EmailConfirmed = true,
                             LockoutEnabled = true,
-                            PasswordHash = hasher.HashPassword(null,"Admin@123")
+                            PasswordHash = hasher.HashPassword(null,password: "Admin@123")
                         },
-                        new ESUser() {
+                        new ApplicationUser() {
                             Email = "user@gmail.com",
                             NormalizedEmail = "USER@GMAIL.COM",
                             FirstName = "User",
@@ -64,7 +64,7 @@ namespace ExpenSpend.Data.Context
                             LockoutEnabled = true,
                             PasswordHash = hasher.HashPassword(null, "User@123")
                         },
-                        new ESUser()
+                        new ApplicationUser()
                         {
                             Email = "rahul@gmail.com",
                             NormalizedEmail = "RAHUL@GMAIL.COM",
@@ -77,7 +77,7 @@ namespace ExpenSpend.Data.Context
                             LockoutEnabled = true,
                             PasswordHash = hasher.HashPassword(null, "Rahul@123")
                         },
-                        new ESUser()
+                        new ApplicationUser()
                         {
                             Email = "aditya@gmail.com",
                             NormalizedEmail = "ADITYA@GMAIL.COM",
@@ -311,54 +311,11 @@ namespace ExpenSpend.Data.Context
                 {
                     context.Friendships.AddRange(new List<Friendship>()
                     {
-                        new Friendship()
-                        {
-                            InitiatorId = adminUser!.Id,
-                            RecipientId = userUser!.Id,
-                            Status = FriendshipStatus.Accepted,
-                            CreatedAt = DateTime.Now,
-                            CreatedBy = adminUser.Id
-                        },
-                        new Friendship()
-                        {
-                            InitiatorId = adminUser.Id,
-                            RecipientId = rahulUser!.Id,
-                            Status = FriendshipStatus.Accepted,
-                            CreatedAt = DateTime.Now,
-                            CreatedBy = adminUser.Id
-                        },
-                        new Friendship()
-                        {
-                            InitiatorId = adminUser.Id,
-                            RecipientId = adityaUser!.Id,
-                            Status = FriendshipStatus.Accepted,
-                            CreatedAt = DateTime.Now,
-                            CreatedBy = adminUser.Id
-                        },
-                        new Friendship()
-                        {
-                            InitiatorId = userUser.Id,
-                            RecipientId = rahulUser.Id,
-                            Status = FriendshipStatus.Accepted,
-                            CreatedAt = DateTime.Now,
-                            CreatedBy = userUser.Id
-                        },
-                        new Friendship()
-                        {
-                            InitiatorId = userUser.Id,
-                            RecipientId = adityaUser.Id,
-                            Status = FriendshipStatus.Accepted,
-                            CreatedAt = DateTime.Now,
-                            CreatedBy = userUser.Id
-                        },
-                        new Friendship()
-                        {
-                            InitiatorId = rahulUser.Id,
-                            RecipientId = adityaUser.Id,
-                            Status = FriendshipStatus.Accepted,
-                            CreatedAt = DateTime.Now,
-                            CreatedBy = rahulUser.Id
-                        }
+                        new Friendship(adminUser!.Id, userUser!.Id, FriendshipStatus.Accepted,DateTime.Now, adminUser.Id),
+                        new Friendship(adminUser.Id,rahulUser!.Id,FriendshipStatus.Accepted,DateTime.Now,adminUser.Id),
+                        new Friendship(adminUser.Id,adityaUser!.Id,FriendshipStatus.Accepted,DateTime.Now, adminUser.Id),
+                        new Friendship(userUser!.Id,rahulUser.Id,FriendshipStatus.Accepted,DateTime.Now,userUser.Id),
+                        new Friendship(userUser.Id,adityaUser.Id,FriendshipStatus.Accepted,DateTime.Now,userUser.Id),
                     });
                     await context.SaveChangesAsync();
                 }

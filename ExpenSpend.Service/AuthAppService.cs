@@ -16,8 +16,8 @@ namespace ExpenSpend.Service
 {
     public class AuthAppService : IAuthAppService
     {
-        private readonly UserManager<ESUser> _userManager;
-        private readonly SignInManager<ESUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
@@ -27,8 +27,8 @@ namespace ExpenSpend.Service
             IHttpContextAccessor contextAccessor,
             IMapper mapper,
             IEmailService emailService,
-            UserManager<ESUser> userManager,
-            SignInManager<ESUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             IConfiguration configuration
         )
         {
@@ -48,7 +48,7 @@ namespace ExpenSpend.Service
                 return UserRegistrationResult.UserExistsError();
             }
 
-            var user = _mapper.Map<ESUser>(input);
+            var user = _mapper.Map<ApplicationUser>(input);
             user.UserName = input.Email;
             var registrationResult = await RegisterUserAsync(user, input.Password);
 
@@ -63,7 +63,7 @@ namespace ExpenSpend.Service
 
         }
 
-        public async Task<IdentityResult> RegisterUserAsync(ESUser? user, string password)
+        public async Task<IdentityResult> RegisterUserAsync(ApplicationUser? user, string password)
         {
             return await _userManager.CreateAsync(user, password);
         }
@@ -97,19 +97,19 @@ namespace ExpenSpend.Service
         {
             await _signInManager.SignOutAsync();
         }
-        public async Task<IdentityResult> ResetPasswordAsync(ESUser? user, string token, string newPassword)
+        public async Task<IdentityResult> ResetPasswordAsync(ApplicationUser? user, string token, string newPassword)
         {
             return await _userManager.ResetPasswordAsync(user, token, newPassword);
         }
-        public async Task<string> GenerateEmailConfirmationTokenAsync(ESUser? user)
+        public async Task<string> GenerateEmailConfirmationTokenAsync(ApplicationUser? user)
         {
             return await _userManager.GenerateEmailConfirmationTokenAsync(user);
         }
-        public async Task<IdentityResult> ConfirmEmailAsync(ESUser? user, string token)
+        public async Task<IdentityResult> ConfirmEmailAsync(ApplicationUser? user, string token)
         {
             return await _userManager.ConfirmEmailAsync(user, token);
         }
-        public async Task<string> GenerateResetToken(ESUser? user)
+        public async Task<string> GenerateResetToken(ApplicationUser? user)
         {
             return await _userManager.GeneratePasswordResetTokenAsync(user);
         }

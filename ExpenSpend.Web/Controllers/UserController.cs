@@ -17,9 +17,9 @@ namespace ExpenSpend.Web.Controllers
     {
         private readonly IUserAppService _userService;
         private readonly IMapper _mapper;
-        private readonly UserManager<ESUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public UserController(IUserAppService userRepository, IMapper mapper, UserManager<ESUser> userManager)
+        public UserController(IUserAppService userRepository, IMapper mapper, UserManager<ApplicationUser> userManager)
         {
             _userService = userRepository;
             _mapper = mapper;
@@ -34,25 +34,25 @@ namespace ExpenSpend.Web.Controllers
             {
                 return NotFound("User not found");
             }
-            return Ok(_mapper.Map<GetUserDto>(user));
+            return Ok(_mapper.Map<GetUserDto>(user.Data));
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();
-            return Ok(users);
+            return Ok(users.Data);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(string id)
         {
             var user = await _userService.GetUserByIdAsync(id);
-            if (user == null)
+            if (user.IsSuccess)
             {
-                return NotFound("User not found");
+               return Ok(_mapper.Map<GetUserDto>(user.Data));
             }
-            return Ok(_mapper.Map<GetUserDto>(user));
+            return NotFound("User not found");
         }
 
         [HttpPut("{id}")]
@@ -70,8 +70,7 @@ namespace ExpenSpend.Web.Controllers
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             var result = await _userService.DeleteUserAsync(id);
-            return Ok(result);
-
+            return Ok(result.Data);
         }
     }
 }

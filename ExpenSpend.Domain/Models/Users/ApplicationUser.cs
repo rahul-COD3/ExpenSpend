@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ExpenSpend.Domain.Models.Users;
 
-public class ESUser : IdentityUser<Guid>
+public class ApplicationUser : IdentityUser<Guid>
 {
     public required string FirstName { get; set; }
     public required string LastName { get; set; }

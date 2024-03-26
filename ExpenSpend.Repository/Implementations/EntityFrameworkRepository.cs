@@ -7,10 +7,10 @@ namespace ExpenSpend.Repository.Implementations
 {
     public class EntityFrameworkRepository<T> : IRepository<T> where T : class
     {
-        private readonly ExpenSpendDbContext _context;
+        private readonly ApplicationDbContext _context;
         private readonly DbSet<T> _dbSet;
 
-        public EntityFrameworkRepository(ExpenSpendDbContext context)
+        public EntityFrameworkRepository(ApplicationDbContext context)
         {
             _context = context;
             _dbSet = _context.Set<T>();

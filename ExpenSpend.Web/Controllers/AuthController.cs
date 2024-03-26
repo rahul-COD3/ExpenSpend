@@ -128,7 +128,7 @@ public class AuthController : ControllerBase
         emailConfirmationResult.Errors.ToList().ForEach(error => ModelState.AddModelError(error.Code, error.Description));
         return Content(ModelState.ToString()!);
     }
-    private async Task SendEmailConfAsync(ESUser? user)
+    private async Task SendEmailConfAsync(ApplicationUser? user)
     {
         var emailConfirmationToken = await _authService.GenerateEmailConfirmationTokenAsync(user);
         var confirmationLink = Url.Action(nameof(ConfirmEmail), "Auth", new { token = emailConfirmationToken, email = user?.Email }, Request.Scheme);

@@ -1,4 +1,3 @@
-using ExpenSpend.Data.Context;
 using ExpenSpend.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,6 +43,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.ApplyMigrations();
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
@@ -51,9 +52,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// Seed Database
-ExpenSpendDbInitializer.Seed(app);
 
 app.UseCors("CorsPolicy");
 

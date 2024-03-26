@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace ExpenSpend.Domain.Migrations
 {
-    [DbContext(typeof(ExpenSpendDbContext))]
+    [DbContext(typeof(ApplicationDbContext))]
     partial class ExpenSpendDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -231,7 +231,7 @@ namespace ExpenSpend.Domain.Migrations
                     b.ToTable("Payments");
                 });
 
-            modelBuilder.Entity("ExpenSpend.Domain.Models.Users.ESUser", b =>
+            modelBuilder.Entity("ExpenSpend.Domain.Models.Users.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -448,7 +448,7 @@ namespace ExpenSpend.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExpenSpend.Domain.Models.Users.ESUser", "PaidBy")
+                    b.HasOne("ExpenSpend.Domain.Models.Users.ApplicationUser", "PaidBy")
                         .WithMany()
                         .HasForeignKey("PaidById")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -461,13 +461,13 @@ namespace ExpenSpend.Domain.Migrations
 
             modelBuilder.Entity("ExpenSpend.Domain.Models.Friends.Friendship", b =>
                 {
-                    b.HasOne("ExpenSpend.Domain.Models.Users.ESUser", "Initiator")
+                    b.HasOne("ExpenSpend.Domain.Models.Users.ApplicationUser", "Initiator")
                         .WithMany()
                         .HasForeignKey("InitiatorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExpenSpend.Domain.Models.Users.ESUser", "Recipient")
+                    b.HasOne("ExpenSpend.Domain.Models.Users.ApplicationUser", "Recipient")
                         .WithMany()
                         .HasForeignKey("RecipientId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -486,7 +486,7 @@ namespace ExpenSpend.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExpenSpend.Domain.Models.Users.ESUser", "User")
+                    b.HasOne("ExpenSpend.Domain.Models.Users.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -505,7 +505,7 @@ namespace ExpenSpend.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExpenSpend.Domain.Models.Users.ESUser", "OwenedBy")
+                    b.HasOne("ExpenSpend.Domain.Models.Users.ApplicationUser", "OwenedBy")
                         .WithMany()
                         .HasForeignKey("OwenedById")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -527,7 +527,7 @@ namespace ExpenSpend.Domain.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<System.Guid>", b =>
                 {
-                    b.HasOne("ExpenSpend.Domain.Models.Users.ESUser", null)
+                    b.HasOne("ExpenSpend.Domain.Models.Users.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -536,7 +536,7 @@ namespace ExpenSpend.Domain.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<System.Guid>", b =>
                 {
-                    b.HasOne("ExpenSpend.Domain.Models.Users.ESUser", null)
+                    b.HasOne("ExpenSpend.Domain.Models.Users.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -551,7 +551,7 @@ namespace ExpenSpend.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExpenSpend.Domain.Models.Users.ESUser", null)
+                    b.HasOne("ExpenSpend.Domain.Models.Users.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -560,7 +560,7 @@ namespace ExpenSpend.Domain.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<System.Guid>", b =>
                 {
-                    b.HasOne("ExpenSpend.Domain.Models.Users.ESUser", null)
+                    b.HasOne("ExpenSpend.Domain.Models.Users.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

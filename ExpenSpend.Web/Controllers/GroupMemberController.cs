@@ -29,7 +29,7 @@ namespace ExpenSpend.Web.Controllers
             var groupMembers = await _groupMemberService.GetAllGroupMembersAsync();
             if(groupMembers.IsSuccess)
             {
-                return Ok(_mapper.Map<GetGroupMemberDto>(groupMembers.Data));
+                return Ok(groupMembers.Data);
             }
             return NotFound(groupMembers);
         }
@@ -40,7 +40,7 @@ namespace ExpenSpend.Web.Controllers
             var groupMember = await _groupMemberService.GetGroupMemberByIdAsync(id);
             if(groupMember.IsSuccess)
             {
-                return Ok(_mapper);
+                return Ok(groupMember.Data);
             }
             return NotFound(groupMember);
         }

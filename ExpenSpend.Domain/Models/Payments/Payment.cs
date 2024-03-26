@@ -6,7 +6,7 @@ namespace ExpenSpend.Domain.Models.Payments
     public class Payment : BaseEntity
     {
         public Guid OwenedById { get; set; }
-        public ESUser? OwenedBy { get; set; }
+        public ApplicationUser? OwenedBy { get; set; }
         public Guid ExpenseId { get; set; }
         public Expense? Expense { get; set; }
         public double Amount { get; set; }

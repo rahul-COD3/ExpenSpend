@@ -13,11 +13,11 @@ namespace ExpenSpend.Service
     public class GroupMemberAppService : IGroupMemberAppService
     {
         private readonly IRepository<GroupMember> _groupMemberRepository;
-        private readonly ExpenSpendDbContext _context;
+        private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContext;
 
-        public GroupMemberAppService(IRepository<GroupMember> groupMemberRepository, ExpenSpendDbContext context, IMapper mapper, IHttpContextAccessor httpContext)
+        public GroupMemberAppService(IRepository<GroupMember> groupMemberRepository, ApplicationDbContext context, IMapper mapper, IHttpContextAccessor httpContext)
         {
             _groupMemberRepository = groupMemberRepository;
             _context = context;

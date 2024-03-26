@@ -14,7 +14,7 @@ namespace ExpenSpend.Service.Contracts
         Task<Response> DeleteUserAsync(Guid id);
         Task<Response> GetAllUsersAsync();
         Task<Response> GetLoggedInUser();
-        Task<ESUser?> GetUserByEmailAsync(string email);
+        Task<ApplicationUser?> GetUserByEmailAsync(string email);
         Task<Response> GetUserByIdAsync(string id);
         Task<Response> GetUserByUserNameAsync(string userName);
         Task<Response> UpdateUserAsync(Guid id, UpdateUserDto user);
