@@ -37,11 +37,11 @@ builder.Services.AddCorsPolicy(configuration);
 var app = builder.Build();
 
 // Use Swagger in development mode.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// if (app.Environment.IsDevelopment())
+// {
+app.UseSwagger();
+app.UseSwaggerUI();
+// }
 
 app.ApplyMigrations();
 

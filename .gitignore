@@ -475,5 +475,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-# appsettings.Development.json
+appsettings.Development.json
 .idea/
+.vscode/
