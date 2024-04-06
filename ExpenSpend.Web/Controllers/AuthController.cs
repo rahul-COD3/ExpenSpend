@@ -9,6 +9,8 @@ using ExpenSpend.Service.Emails.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ExpenSpend.Service.Contracts;
+using Microsoft.AspNetCore.Authentication;
+using AutoMapper;
 
 namespace ExpenSpend.Web.Controllers;
 
@@ -20,11 +22,13 @@ public class AuthController : ControllerBase
     private readonly IAuthAppService _authService;
     private readonly IUserAppService _userService;
     private readonly IEmailService _emailService;
-    public AuthController(IAuthAppService authService, IEmailService emailService, IUserAppService userService)
+    private readonly IAuth0Service _auth0Service;
+    public AuthController(IAuthAppService authService, IEmailService emailService, IUserAppService userService, IAuth0Service auth0Service)
     {
         _authService = authService;
         _emailService = emailService;
         _userService = userService;
+        _auth0Service = auth0Service;
     }
 
     [HttpPost("register")]
@@ -128,6 +132,16 @@ public class AuthController : ControllerBase
         emailConfirmationResult.Errors.ToList().ForEach(error => ModelState.AddModelError(error.Code, error.Description));
         return Content(ModelState.ToString()!);
     }
+
+    [HttpGet("auth0-login")]
+    [Authorize]
+    public async Task<IActionResult> Auth0Login()
+    {
+        var accessToken = await HttpContext.GetTokenAsync("access_token");
+        var result = await _auth0Service.GetUserInfo(accessToken);
+        return Ok(result);
+    }
+
     private async Task SendEmailConfAsync(ApplicationUser? user)
     {
         var emailConfirmationToken = await _authService.GenerateEmailConfirmationTokenAsync(user);

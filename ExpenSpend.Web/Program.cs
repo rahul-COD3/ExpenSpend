@@ -1,4 +1,5 @@
 using ExpenSpend.Web;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -22,6 +23,9 @@ builder.Services.AddIdentityConfig();
 // Setup JWT authentication.
 builder.Services.AddJwtAuthentication(configuration);
 
+// Authorization policy for JWT.
+builder.Services.AddJwtAuthorizationPolicy();
+
 // Setup email services.
 builder.Services.AddEmailService(configuration);
 
@@ -36,12 +40,10 @@ builder.Services.AddCorsPolicy(configuration);
 
 var app = builder.Build();
 
-// Use Swagger in development mode.
-// if (app.Environment.IsDevelopment())
-// {
+// Use Swagger
+
 app.UseSwagger();
 app.UseSwaggerUI();
-// }
 
 app.ApplyMigrations();
 

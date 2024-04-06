@@ -93,6 +93,23 @@ namespace ExpenSpend.Service
             var expirationTime = rememberMe ? DateTime.Now.AddDays(30) : DateTime.Now.AddHours(8);
             return GenerateTokenOptions(authClaims, expirationTime);
         }
+        // set claims for user and generate token
+        public async Task<JwtSecurityToken?> LoginUserJwtAsync(ApplicationUser? user, bool rememberMe)
+        {
+            var authClaims = new List<Claim>
+            {
+                new(ClaimTypes.Name, user.UserName!),
+                new(ClaimTypes.Email, user.Email),
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new("FirstName",user.FirstName),
+                new(ClaimTypes.Surname, user.LastName),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            authClaims.AddRange((await _userManager.GetRolesAsync(user)).Select(role => new Claim(ClaimTypes.Role, role)));
+            var expirationTime = rememberMe ? DateTime.Now.AddDays(30) : DateTime.Now.AddHours(8);
+            return GenerateTokenOptions(authClaims, expirationTime);
+        }
         public async Task LogoutUserAsync()
         {
             await _signInManager.SignOutAsync();
@@ -117,10 +134,11 @@ namespace ExpenSpend.Service
         // Private method to generate JWT token options...
         private JwtSecurityToken? GenerateTokenOptions(List<Claim> authClaims, DateTime expires)
         {
+
             var key = Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]!);
             var tokenOptions = new JwtSecurityToken(
-                        issuer: _configuration["JWT:ValidIssuer"],
-                        audience: _configuration["JWT:ValidAudience"],
+                        issuer: _configuration["JWT:Issuer"],
+                        audience: _configuration["JWT:Audience"],
                         claims: authClaims,
                         expires: expires,
                         signingCredentials: new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256));

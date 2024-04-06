@@ -10,7 +10,6 @@ using ExpenSpend.Service;
 using ExpenSpend.Service.Contracts;
 using ExpenSpend.Service.Emails;
 using ExpenSpend.Service.Emails.Interfaces;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -19,6 +18,8 @@ using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Builder;
+using ExpenSpend.Domain.DTOs.Accounts;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ExpenSpend.Web;
 
@@ -65,25 +66,44 @@ public static class ExpenSpendWebConfigurations
 
     public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
+        var jwtSettings = configuration.GetSection("JWT").Get<JwtSettingsDto>()!;
+
         services.AddAuthentication(options =>
         {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(options =>
+            options.DefaultAuthenticateScheme = "Bearer";
+        })
+      .AddJwtBearer("Bearer", options =>
+      {
+          options.SaveToken = true;
+          options.RequireHttpsMetadata = false;
+          options.TokenValidationParameters = new TokenValidationParameters
+          {
+              ValidateIssuerSigningKey = true,
+              ValidateIssuer = true,
+              ValidateAudience = true,
+              ValidAudience = jwtSettings.Audience,
+              ValidIssuer = jwtSettings.Issuer,
+              IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
+          };
+      }).AddJwtBearer("Auth0", options =>
+      {
+          options.Authority = $"https://{configuration["Auth0:Domain"]}/";
+          options.Audience = configuration["Auth0:Audience"];
+          options.TokenValidationParameters = new TokenValidationParameters
+          {
+              ValidateAudience = true,
+              ValidateIssuerSigningKey = true
+          };
+      }).AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"), jwtBearerScheme: "AzureAd");
+    }
+
+    public static void AddJwtAuthorizationPolicy(this IServiceCollection services)
+    {
+        services.AddAuthorization(options =>
         {
-            options.SaveToken = true;
-            options.RequireHttpsMetadata = false;
-            options.TokenValidationParameters = new TokenValidationParameters()
-            {
-                ValidateIssuerSigningKey = true,
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidAudience = configuration["JWT:ValidAudience"],
-                ValidIssuer = configuration["JWT:ValidIssuer"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]!))
-            };
-        }).AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"), jwtBearerScheme: "AzureAd");
+            options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                .RequireAuthenticatedUser().AddAuthenticationSchemes("Bearer", "Auth0").Build();
+        });
     }
 
     public static void AddEmailService(this IServiceCollection services, IConfiguration configuration)
@@ -100,6 +120,7 @@ public static class ExpenSpendWebConfigurations
         services.AddScoped<IFriendAppService, FriendAppService>();
         services.AddScoped<IGroupAppService, GroupAppService>();
         services.AddScoped<IGroupMemberAppService, GroupMemberAppService>();
+        services.AddScoped<IAuth0Service, Auth0Service>();
         services.AddHttpContextAccessor();
     }
 

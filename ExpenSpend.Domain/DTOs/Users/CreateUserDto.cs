@@ -15,7 +15,7 @@ public class CreateUserDto
     public required string Email { get; set; }
 
     [RegularExpression(UserConsts.PhoneNumberRegex, ErrorMessage = UserConsts.PhoneNumberRegexErrorMessage)]
-    public required string PhoneNumber { get; set; }
+    public string? PhoneNumber { get; set; }
 
     [RegularExpression(UserConsts.PasswordRegex, ErrorMessage = UserConsts.PasswordRegexErrorMessage)]
     public required string Password { get; set; }

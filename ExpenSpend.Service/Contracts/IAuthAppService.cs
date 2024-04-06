@@ -13,6 +13,7 @@ namespace ExpenSpend.Service.Contracts
         Task<string> GenerateResetToken(ApplicationUser? user);
         Task<SignInResult> LoginUserAsync(string email, string password);
         Task<JwtSecurityToken?> LoginUserJwtAsync(string userName, string password, bool rememberMe);
+        Task<JwtSecurityToken?> LoginUserJwtAsync(ApplicationUser? user, bool rememberMe);
         Task LogoutUserAsync();
         Task<UserRegistrationResult> RegisterUserAsync(CreateUserDto input);
         Task<IdentityResult> RegisterUserAsync(ApplicationUser? user, string password);
