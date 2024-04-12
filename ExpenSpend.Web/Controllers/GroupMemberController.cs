@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using ExpenSpend.Domain.DTOs.GroupMembers;
-using ExpenSpend.Domain.Models.GroupMembers;
 using ExpenSpend.Service.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
