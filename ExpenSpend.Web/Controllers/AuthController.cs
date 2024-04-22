@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ExpenSpend.Service.Contracts;
 using Microsoft.AspNetCore.Authentication;
+using System.Runtime.CompilerServices;
 
 namespace ExpenSpend.Web.Controllers;
 
@@ -49,11 +50,11 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> LoginUserAsync(LoginDto login)
     {
         var userToken = await _authService.LoginUserJwtAsync(login.Email, login.Password, login.RememberMe);
-        if (userToken != null)
+        if (userToken.IsSuccess)
         {
-            return Ok(new { token = new JwtSecurityTokenHandler().WriteToken(userToken) });
+            return Ok(userToken.Data);
         }
-        return Unauthorized();
+        return BadRequest(userToken);
     }
 
     [Authorize]

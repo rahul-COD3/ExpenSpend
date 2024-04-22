@@ -7,10 +7,13 @@ using ExpenSpend.Domain.DTOs.Users;
 using ExpenSpend.Domain.Models.Users;
 using ExpenSpend.Service.Contracts;
 using ExpenSpend.Service.Emails.Interfaces;
+using ExpenSpend.Service.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace ExpenSpend.Service
 {
@@ -70,12 +73,37 @@ namespace ExpenSpend.Service
         {
             return await _signInManager.PasswordSignInAsync(email, password, false, false);
         }
-        public async Task<JwtSecurityToken?> LoginUserJwtAsync(string userName, string password, bool rememberMe)
+        public async Task<Response> LoginUserJwtAsync(string userName, string password, bool rememberMe)
         {
             var user = await _userManager.FindByNameAsync(userName);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, password))
+
+            if (user == null)
             {
-                return null;
+                return new Response("Oops! We couldn't find your account. Please double-check your credentials or consider signing up for a new account if you haven't already.");
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(user, password, rememberMe, false);
+
+            if (!result.Succeeded)
+            {
+                if (result.IsNotAllowed)
+                {
+                    var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, password);
+
+                    if (!isPasswordCorrect)
+                    {
+                        return new Response("Oops! It seems your credentials are incorrect. Please double-check your password and try again.");
+                    }
+
+                    var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    emailConfirmationToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
+                    var emailConfirmationLink = $"{_contextAccessor.HttpContext?.Request.Scheme}://{_contextAccessor.HttpContext?.Request.Host}/api/auth/confirm-email?token={emailConfirmationToken}&email={user.Email}";
+                    var emailMessage = await _emailService.CreateEmailValidationTemplateMessage(user?.Email!, emailConfirmationLink!);
+                    _emailService.SendEmail(emailMessage);
+                    return new Response("Uh-oh! It looks like your email hasn't been confirmed yet. Don't worry, we've just sent you a new confirmation email. Please verify your email before logging in.");
+                }
+
+                return new Response("Oops! It seems the email or password you entered is incorrect. Please double-check both and try again.");
             }
 
             var authClaims = new List<Claim>
@@ -90,8 +118,11 @@ namespace ExpenSpend.Service
 
             authClaims.AddRange((await _userManager.GetRolesAsync(user)).Select(role => new Claim(ClaimTypes.Role, role)));
             var expirationTime = rememberMe ? DateTime.Now.AddDays(30) : DateTime.Now.AddHours(8);
-            return GenerateTokenOptions(authClaims, expirationTime);
+            var token = GenerateTokenOptions(authClaims, expirationTime);
+
+            return new Response(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
         }
+
 
         // set claims for user and generate token
         public async Task<JwtSecurityToken?> LoginUserJwtAsync(ApplicationUser? user, bool rememberMe)
