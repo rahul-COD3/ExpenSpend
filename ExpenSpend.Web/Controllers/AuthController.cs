@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ExpenSpend.Service.Contracts;
 using Microsoft.AspNetCore.Authentication;
-using AutoMapper;
 
 namespace ExpenSpend.Web.Controllers;
 
@@ -139,6 +138,10 @@ public class AuthController : ControllerBase
     {
         var accessToken = await HttpContext.GetTokenAsync("access_token");
         var result = await _auth0Service.GetUserInfo(accessToken);
+        if (result == null)
+        {
+            BadRequest("Something went wrong!");
+        }
         return Ok(result);
     }
 

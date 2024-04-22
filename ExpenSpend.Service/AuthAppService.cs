@@ -62,7 +62,6 @@ namespace ExpenSpend.Service
             }
 
         }
-
         public async Task<IdentityResult> RegisterUserAsync(ApplicationUser? user, string password)
         {
             return await _userManager.CreateAsync(user, password);
@@ -93,6 +92,7 @@ namespace ExpenSpend.Service
             var expirationTime = rememberMe ? DateTime.Now.AddDays(30) : DateTime.Now.AddHours(8);
             return GenerateTokenOptions(authClaims, expirationTime);
         }
+
         // set claims for user and generate token
         public async Task<JwtSecurityToken?> LoginUserJwtAsync(ApplicationUser? user, bool rememberMe)
         {
