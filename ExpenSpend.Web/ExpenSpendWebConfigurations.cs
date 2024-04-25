@@ -20,6 +20,8 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Builder;
 using ExpenSpend.Domain.DTOs.Accounts;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace ExpenSpend.Web;
 
@@ -70,7 +72,8 @@ public static class ExpenSpendWebConfigurations
 
         services.AddAuthentication(options =>
         {
-            options.DefaultAuthenticateScheme = "Bearer";
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         })
       .AddJwtBearer("Bearer", options =>
       {
@@ -91,8 +94,7 @@ public static class ExpenSpendWebConfigurations
           options.Audience = configuration["Auth0:Audience"];
           options.TokenValidationParameters = new TokenValidationParameters
           {
-              ValidateAudience = true,
-              ValidateIssuerSigningKey = true
+              NameClaimType = ClaimTypes.NameIdentifier
           };
       }).AddMicrosoftIdentityWebApi(configuration.GetSection("AzureAd"), jwtBearerScheme: "AzureAd");
     }
