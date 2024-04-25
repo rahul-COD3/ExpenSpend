@@ -1,5 +1,4 @@
 ﻿using ExpenSpend.Domain.DTOs.GroupMembers;
-using ExpenSpend.Domain.Helpers;
 using ExpenSpend.Service.Models;
 
 namespace ExpenSpend.Service.Contracts;

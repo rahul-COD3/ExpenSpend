@@ -18,6 +18,7 @@ namespace ExpenSpend.Data.Context
             using (var serviceScope = applicationBuilder.ApplicationServices.CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetService<ApplicationDbContext>();
+                var _userManager = serviceScope.ServiceProvider.GetService<UserManager<ApplicationUser>>();
 
                 context!.Database.EnsureCreated();
 
@@ -38,56 +39,41 @@ namespace ExpenSpend.Data.Context
                 var hasher = new PasswordHasher<ApplicationUser>();
                 if (!context.Users.Any())
                 {
+                    
                     context.Users.AddRange(new List<ApplicationUser>()
                     {
                         new ApplicationUser() {
                             Email = "admin@gmail.com",
-                            NormalizedEmail = "ADMIN@GMAIL.COM",
                             FirstName = "Admin",
                             LastName = "User",
                             UserName = "admin@gmail.com",
-                            NormalizedUserName = "ADMIN@GMAIL.COM",
-                            ConcurrencyStamp ="1",
                             EmailConfirmed = true,
-                            LockoutEnabled = true,
-                            PasswordHash = hasher.HashPassword(null,password: "Admin@123")
+                            PasswordHash = hasher.HashPassword(null, password: "Admin@123")
                         },
                         new ApplicationUser() {
                             Email = "user@gmail.com",
-                            NormalizedEmail = "USER@GMAIL.COM",
                             FirstName = "User",
                             LastName = "User",
                             UserName = "user@gmail.com",
-                            NormalizedUserName = "USER@GMAIL.COM",
-                            ConcurrencyStamp ="2",
                             EmailConfirmed = true,
-                            LockoutEnabled = true,
                             PasswordHash = hasher.HashPassword(null, "User@123")
                         },
                         new ApplicationUser()
                         {
                             Email = "rahul@gmail.com",
-                            NormalizedEmail = "RAHUL@GMAIL.COM",
                             FirstName = "Rahul",
                             LastName = "Kumar",
                             UserName = "rahul@gmail.com",
-                            NormalizedUserName = "RAHUL@GMAIL.COM",
-                            ConcurrencyStamp = "3",
                             EmailConfirmed = true,
-                            LockoutEnabled = true,
                             PasswordHash = hasher.HashPassword(null, "Rahul@123")
                         },
                         new ApplicationUser()
                         {
                             Email = "aditya@gmail.com",
-                            NormalizedEmail = "ADITYA@GMAIL.COM",
                             FirstName = "Aditya",
                             LastName = "Kumar",
                             UserName = "aditya@gmail.com",
-                            NormalizedUserName = "ADITYA@GMAIL.COM",
-                            ConcurrencyStamp = "4",
                             EmailConfirmed = true,
-                            LockoutEnabled = true,
                             PasswordHash = hasher.HashPassword(null, "Aditya@123")
                         }
                     });
@@ -100,6 +86,37 @@ namespace ExpenSpend.Data.Context
                 var userUser = await context.Users.FirstOrDefaultAsync(x => x.UserName == "user@gmail.com");
                 var rahulUser = await context.Users.FirstOrDefaultAsync(x => x.UserName == "rahul@gmail.com");
                 var adityaUser = await context.Users.FirstOrDefaultAsync(x => x.UserName == "aditya@gmail.com");
+
+                // Updating ConcurrencyStamp and SecurityStamp for Users
+
+                if (!context.UserRoles.Any())
+                {
+                    // Admin User
+                    await _userManager.UpdateSecurityStampAsync(adminUser);
+                    await _userManager.UpdateNormalizedEmailAsync(adminUser);
+                    await _userManager.UpdateNormalizedUserNameAsync(adminUser);
+                    await _userManager.SetLockoutEnabledAsync(adminUser, true);
+
+                    // User User
+                    await _userManager.UpdateSecurityStampAsync(userUser);
+                    await _userManager.UpdateNormalizedEmailAsync(userUser);
+                    await _userManager.UpdateNormalizedUserNameAsync(userUser);
+                    await _userManager.SetLockoutEnabledAsync(userUser, true);
+
+                    // Rahul User
+                    await _userManager.UpdateSecurityStampAsync(rahulUser);
+                    await _userManager.UpdateNormalizedEmailAsync(rahulUser);
+                    await _userManager.UpdateNormalizedUserNameAsync(rahulUser);
+                    await _userManager.SetLockoutEnabledAsync(rahulUser, true);
+
+                    // Aditya User
+                    await _userManager.UpdateSecurityStampAsync(adityaUser);
+                    await _userManager.UpdateNormalizedEmailAsync(adityaUser);
+                    await _userManager.UpdateNormalizedUserNameAsync(adityaUser);
+                    await _userManager.SetLockoutEnabledAsync(adityaUser, true);
+
+                    await context.SaveChangesAsync();
+                }
 
                 // Seed UserRoles
                 if (!context.UserRoles.Any())

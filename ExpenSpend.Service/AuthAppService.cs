@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using AutoMapper;
 using ExpenSpend.Domain.DTOs.Accounts;
@@ -7,6 +8,7 @@ using ExpenSpend.Domain.DTOs.Users;
 using ExpenSpend.Domain.Models.Users;
 using ExpenSpend.Service.Contracts;
 using ExpenSpend.Service.Emails.Interfaces;
+using ExpenSpend.Service.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -62,20 +64,55 @@ namespace ExpenSpend.Service
             }
 
         }
-        public async Task<IdentityResult> RegisterUserAsync(ApplicationUser? user, string password)
+        public async Task<IdentityResult> RegisterUserAsync(ApplicationUser user, string password)
         {
-            return await _userManager.CreateAsync(user, password);
+            var result = await _userManager.CreateAsync(user, password);
+            if(!result.Succeeded)
+            {
+                if (result.Errors.Any(e => e.Code == "DuplicateUserName"))
+                {
+                    return IdentityResult.Failed(new IdentityError { Code = "DuplicateUserName", Description = "Oops! Looks like there's already an account with this email. Please log in or use a different email to sign up." });
+                }
+                return IdentityResult.Failed(result.Errors.ToArray());
+            }
+            await _userManager.AddToRoleAsync(user, "User");
+            return result;
         }
         public async Task<SignInResult> LoginUserAsync(string email, string password)
         {
             return await _signInManager.PasswordSignInAsync(email, password, false, false);
         }
-        public async Task<JwtSecurityToken?> LoginUserJwtAsync(string userName, string password, bool rememberMe)
+        public async Task<Response> LoginUserJwtAsync(string userName, string password, bool rememberMe)
         {
             var user = await _userManager.FindByNameAsync(userName);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, password))
+
+            if (user == null)
             {
-                return null;
+                return new Response("Oops! We couldn't find your account. Please double-check your credentials or consider signing up for a new account if you haven't already.");
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(user, password, rememberMe, false);
+
+            if (!result.Succeeded)
+            {
+                if (result.IsNotAllowed)
+                {
+                    if (!await _userManager.CheckPasswordAsync(user, password))
+                    {
+                        return new Response("Oops! It seems your credentials are incorrect. Please double-check your password and try again.");
+                    }
+                    if (!await _userManager.IsEmailConfirmedAsync(user))
+                    {
+                        return new Response("EMAIL_IS_NOT_VERIFIED");
+                    }
+                    if (await _userManager.IsLockedOutAsync(user))
+                    {
+                        return new Response("Your account has been locked out. Please try again later or reset your password.");
+                    }
+                    return new Response("Oops! It seems there was an issue with your account. Please try again later or contact support.");
+                }
+
+                return new Response("Oops! It seems the email or password you entered is incorrect. Please double-check both and try again.");
             }
 
             var authClaims = new List<Claim>
@@ -90,8 +127,11 @@ namespace ExpenSpend.Service
 
             authClaims.AddRange((await _userManager.GetRolesAsync(user)).Select(role => new Claim(ClaimTypes.Role, role)));
             var expirationTime = rememberMe ? DateTime.Now.AddDays(30) : DateTime.Now.AddHours(8);
-            return GenerateTokenOptions(authClaims, expirationTime);
+            var token = GenerateTokenOptions(authClaims, expirationTime);
+
+            return new Response(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
         }
+
 
         // set claims for user and generate token
         public async Task<JwtSecurityToken?> LoginUserJwtAsync(ApplicationUser? user, bool rememberMe)
@@ -143,6 +183,15 @@ namespace ExpenSpend.Service
                         expires: expires,
                         signingCredentials: new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256));
             return tokenOptions;
+        }
+        private string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+                return Convert.ToBase64String(randomNumber);
+            }
         }
     }
 }

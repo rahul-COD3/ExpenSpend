@@ -1,6 +1,7 @@
 ﻿using ExpenSpend.Domain.DTOs.Accounts;
 using ExpenSpend.Domain.DTOs.Users;
 using ExpenSpend.Domain.Models.Users;
+using ExpenSpend.Service.Models;
 using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
 
@@ -45,7 +46,7 @@ namespace ExpenSpend.Service.Contracts
         /// <param name="password">The password of the user.</param>
         /// <param name="rememberMe">Flag indicating whether to remember the user.</param>
         /// <returns>A JWT token if login is successful, otherwise null.</returns>
-        Task<JwtSecurityToken?> LoginUserJwtAsync(string userName, string password, bool rememberMe);
+        Task<Response> LoginUserJwtAsync(string userName, string password, bool rememberMe);
 
         /// <summary>
         /// Logs in a user and generates a JWT token asynchronously.
