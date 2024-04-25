@@ -1,5 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using ExpenSpend.Domain.DTOs.Accounts.Const;
 using ExpenSpend.Domain.DTOs.Users;
@@ -9,8 +8,6 @@ using ExpenSpend.Service.Emails.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ExpenSpend.Service.Contracts;
-using Microsoft.AspNetCore.Authentication;
-using System.Runtime.CompilerServices;
 
 namespace ExpenSpend.Web.Controllers;
 
@@ -50,11 +47,18 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> LoginUserAsync(LoginDto login)
     {
         var userToken = await _authService.LoginUserJwtAsync(login.Email, login.Password, login.RememberMe);
-        if (userToken.IsSuccess)
+        if (!userToken.IsSuccess)
         {
-            return Ok(userToken.Data);
+            if (userToken.Data is "EMAIL_IS_NOT_VERIFIED")
+            {
+                var user = await _userService.GetUserByEmailAsync(login.Email);
+                await SendEmailConfAsync(user);
+                return BadRequest("Uh-oh! It looks like your email hasn't been confirmed yet. Don't worry, we've just sent you a new confirmation email. Please verify your email before logging in.");
+            }
+            return BadRequest(userToken.Data);
         }
-        return BadRequest(userToken);
+        
+        return Ok(userToken.Data);
     }
 
     [Authorize]
@@ -137,8 +141,9 @@ public class AuthController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Auth0Login()
     {
-        var accessToken = await HttpContext.GetTokenAsync("access_token");
-        var result = await _auth0Service.GetUserInfo(accessToken);
+        // get bearer token from request headder
+        var jwtToken  = HttpContext.Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last();
+        var result = await _auth0Service.GetUserInfo(jwtToken);
         if (result == null)
         {
             BadRequest("Something went wrong!");
