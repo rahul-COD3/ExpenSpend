@@ -25,7 +25,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace ExpenSpend.Web;
 
-public static class ExpenSpendWebConfigurations
+public static class PlatformService
 {
     public static void AddDbContextConfig(this IServiceCollection services, IConfiguration configuration)
     {
