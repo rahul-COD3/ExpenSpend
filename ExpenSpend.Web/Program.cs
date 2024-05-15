@@ -1,9 +1,14 @@
+using Serilog;
 using ExpenSpend.Web;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using ExpenSpend.Web.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
+
+// Configure logger
+builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
 // Register services
 builder.Services.AddAutoMapper(typeof(Program));
@@ -27,6 +32,9 @@ app.UseCors("CorsPolicy");
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseSerilogRequestLogging();
+app.UseMiddleware<SerilogRequestLogger>();
 
 app.UseSwagger();
 app.UseSwaggerUI();
