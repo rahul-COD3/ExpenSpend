@@ -12,6 +12,6 @@ namespace ExpenSpend.Domain.DTOs.Groups
         public DateTime? ModifiedAt { get; set; }
         public Guid? ModifiedBy { get; set; }
         public bool IsDeleted { get; set; }
-        public GetGroupMemberDto? GroupMember { get; set; }
+        public List<GetGroupMemberDto>? GroupMember { get; set; }
     }
 }

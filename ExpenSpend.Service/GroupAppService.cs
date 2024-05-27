@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using ExpenSpend.Service.Models;
 using ExpenSpend.Service.Contracts;
+using ExpenSpend.Domain.DTOs.GroupMembers;
 
 namespace ExpenSpend.Service;
 
@@ -36,9 +37,12 @@ public class GroupAppService : IGroupAppService
         var group = await _context.Groups.Include(g => g.Members).FirstOrDefaultAsync(g => g.Id == id);
         if (group != null)
         {
-            return new Response(_mapper.Map<GetGroupDto>(group));
+            var result = _mapper.Map<GetGroupDto>(group);
+            var groupMebersResult = _mapper.Map<List<GetGroupMemberDto>>(group.Members);
+            result.GroupMember = groupMebersResult;
+            return new Response(group);
         }
-        return null;
+        return new Response("Group not found!");
     }
     public async Task<Response> CreateGroupAsync(CreateGroupDto input)
     {
@@ -83,6 +87,7 @@ public class GroupAppService : IGroupAppService
         var currUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == currentUser);
         var group = new Group
         {
+            Id = Guid.NewGuid(),
             Name = input.Name,
             About = input.About,
             CreatedBy = currUser?.Id,
@@ -145,13 +150,20 @@ public class GroupAppService : IGroupAppService
     }
     public async Task<Response> SoftDeleteAsync(Guid id)
     {
-        var existingGroup = await _groupRepository.GetByIdAsync(id);
+        var existingGroup = await _context.Groups.Include(g => g.Members).FirstOrDefaultAsync(g => g.Id == id);
         if (existingGroup == null)
         {
             new Response("Group not found");
         }
         existingGroup!.IsDeleted= true;
+        // mark all group members as deleted
+        foreach (var member in existingGroup.Members)
+        {
+            member.IsDeleted = true;
+        }
+        _context.GroupMembers.UpdateRange(existingGroup.Members);
         await _groupRepository.UpdateAsync(existingGroup);
+        await _context.SaveChangesAsync();
         return new Response(_mapper.Map<GetGroupDto>(existingGroup));
     }
     public async Task<Response> DeleteGroupAsync(Guid id)

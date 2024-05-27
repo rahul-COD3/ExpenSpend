@@ -45,7 +45,7 @@ namespace ExpenSpend.Web.Controllers
             {
                 return Ok(groups.Data);
             }
-            return NotFound(groups);
+            return NotFound(groups.Data);
         }
 
         [HttpPost]
@@ -67,7 +67,7 @@ namespace ExpenSpend.Web.Controllers
             {
                 return Ok(result.Data);
             }
-            return BadRequest(result);
+            return BadRequest(result.Data);
         }
 
         [HttpPut("{id}")]
@@ -89,7 +89,7 @@ namespace ExpenSpend.Web.Controllers
             {
                 return Ok(result.Data);
             }
-            return BadRequest(result);
+            return BadRequest(result.Data);
         }
     }
 }
