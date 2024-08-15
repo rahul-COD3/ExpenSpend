@@ -1,0 +1,7 @@
+**/[b|B]in/
+**/[O|o]bj/
+**.git/
+**.vs/
+**.vscode/
+**.idea/
+**/README.md
